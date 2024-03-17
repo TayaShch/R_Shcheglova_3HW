@@ -1,0 +1,87 @@
+---
+title: "Home_task_3"
+format: html
+editor: visual
+---
+
+```{r}
+# Загрузка библиотеки
+library(readxl)
+
+# Чтение данных из Excel файла
+data <- read_excel("D://IDE/pima.xlsx")
+
+# Вычисление описательных статистик
+descriptive_stats <- summary(data[c("glucose", "pressure", "mass")])
+
+# Печать результатов
+print(descriptive_stats)
+```
+
+```{r}
+# Описательная статистика для переменной diabetes
+table(data$diabetes) # Для подсчета частоты уникальных значений
+
+```
+
+```{r}
+# Создание новой переменной age_group
+data$age_group <- cut(data$age, breaks = c(20, 35, 49, Inf), labels = c("21–35", "36–49", "50+"), right = TRUE)
+
+# Описательная статистика для age_group
+table(data$age_group) # Для подсчета частоты уникальных групп
+
+```
+
+```{r}
+# Установка уровня доверия
+confidence_level <- 0.90
+
+# Расчет среднего значения и стандартной ошибки среднего для переменной pedigree
+mean_pedigree <- mean(data$pedigree)
+std_err_pedigree <- sd(data$pedigree) / sqrt(length(data$pedigree))
+
+# Расчет доверительного интервала
+error_margin <- qt((1 - confidence_level) / 2 + confidence_level, df=length(data$pedigree)-1) * std_err_pedigree
+lower_bound <- mean_pedigree - error_margin
+upper_bound <- mean_pedigree + error_margin
+
+# Вывод результатов
+cat("90% доверительный интервал для переменной pedigree: [", lower_bound, ", ", upper_bound, "]", sep="")
+
+```
+
+```{r}
+library(ggplot2)
+
+# График плотности вероятности для переменной glucose
+ggplot(data, aes(x=glucose)) + 
+  geom_density(aes(fill=factor(diabetes)), alpha=0.5) +
+  geom_vline(aes(xintercept=mean(glucose, na.rm=TRUE)), color="red", linetype="dashed") +
+  labs(title="Плотность вероятности для переменной Glucose", x="Glucose", fill="Diabetes")
+
+# Гистограмма для переменной glucose
+ggplot(data, aes(x=glucose)) + 
+  geom_histogram(aes(fill=factor(diabetes)), bins=30, alpha=0.5) +
+  labs(title="Гистограмма переменной Glucose", x="Glucose", y="Частота", fill="Diabetes")
+
+# Ящики с усами для переменной glucose по группам diabetes
+ggplot(data, aes(x=factor(diabetes), y=glucose, fill=factor(diabetes))) + 
+  geom_boxplot() +
+  labs(title="Ящики с усами по группам Diabetes", x="Diabetes", y="Glucose")
+
+
+```
+
+```{r}
+
+# Построение диаграммы рассеяния
+ggplot(data, aes(x=triceps, y=mass, color=diabetes, shape=diabetes)) + 
+  geom_point() +
+  scale_color_manual(values=c("pos"="red", "neg"="blue")) +
+  labs(title="Взаимосвязь между обхватом трицепса и массой тела", x="Обхват трицепса", y="Масса тела") +
+  theme_minimal() +
+  theme(legend.title=element_blank())
+
+
+```
